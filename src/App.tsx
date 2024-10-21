@@ -1,8 +1,12 @@
 import React from 'react';
+import { Matrix } from './Matrix';
+import { AppContextProvider } from './RootContext';
 
 function App() {
   return (
-    <div className="App">Hello</div>
+    <AppContextProvider>
+      <Matrix />
+    </AppContextProvider>
   );
 }
 
