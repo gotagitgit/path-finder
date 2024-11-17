@@ -6,9 +6,11 @@ export const initialState: IRootState =
 {
     nodes: [],
     grid: {
-        row: 0,
-        col: 0,
-    }
+        rows: 0,
+        cols: 0,
+        startCoordinate: {row: 0, col: 0},
+        finishCoordinate: {row: 0, col: 0},
+    },
 }
 
 export const AppContext = createContext<IRootState>(initialState)

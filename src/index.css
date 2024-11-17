@@ -51,6 +51,16 @@ html, body {
     cursor: pointer;
   }
 
+  .grid-item-blocked {
+    background-color: #585656ee;
+    border: 2px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+
+
   /* button {
     border: none;
     width: 100%;

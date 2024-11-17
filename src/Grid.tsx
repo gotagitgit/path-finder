@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useState } from "react";
 import { reducer } from "./reducer";
 import { initialState } from "./RootContext";
-import { IGrid, INode } from "./models";
+import { ICoordinate, IGrid, INode } from "./models";
 import { ActionTypes } from "./actions";
 
 export function Grid()
@@ -10,9 +10,13 @@ export function Grid()
 
     const [squareSize, setSquareSize] = useState(0);
 
+    const [boxes, setBoxes] = useState<JSX.Element[][]>([[]])
+
     const updateSquareSize = () => setSquareSize(getSquareSize);
 
     useEffect(() => {
+        console.log("useEffect triggered");
+
         updateSquareSize(); // Set initial size
 
         window.addEventListener("resize", updateSquareSize); // Update size on window resize
@@ -20,28 +24,43 @@ export function Grid()
         dispatch({
             type: ActionTypes.UPDATE_GRID,
             payload: {
-                row: 6,
-                col: 6,
+                ...state.grid,
+                rows: 6,
+                cols: 6,
             }
         })
+    }, []);
 
+    useEffect(() => {
         const nodes = initializeGridWithNodes(state.grid);
+        console.log("Initialized nodes:", nodes);
+
+        const coordinates = [
+            { row: 0, col: 2 },
+            { row: 1, col: 2 }
+        ];
+
+        const updatedNodes = setMap(nodes, coordinates);
+        console.log("Updated nodes:", updatedNodes);
 
         dispatch({
             type: ActionTypes.UPDATE_NODES,
-            payload: nodes
+            payload: updatedNodes
         })
 
-        return () => window.removeEventListener("resize", updateSquareSize);
-    });
+        return () => {
+            console.log("Cleaning up event listener");
+            window.removeEventListener("resize", updateSquareSize);
+        }
+    }, [state.grid])
 
-    const { row, col } = state.grid;
+    useEffect(() => {
+        const updatedBoxes = generateSquaresFromNodes(state.nodes);
 
-    const gridLength = row * col;
+        setBoxes(updatedBoxes);
+    }, [state.nodes])
 
-    const gridItems = Array.from({ length: gridLength }, (_, index) => index + 1);
-
-    const boxes = generateSquaresFromNodes(state.nodes);
+    const { rows: row, cols: col } = state.grid;
 
     return (
         <div className="grid-container"
@@ -50,9 +69,7 @@ export function Grid()
                 gridTemplateRows: `repeat(${row}, ${squareSize}px)`,
                 gridTemplateColumns: `repeat(${col}, ${squareSize}px)`,
             }}>
-            {
-                boxes
-            }
+                {boxes}
         </div>
     );
 };
@@ -64,7 +81,7 @@ function generateSquaresFromNodes(nodes: INode[][])
         return row.map((node, colIndex) =>
         {
             return (
-                <button className="grid-item" key={`${rowindex}-${colIndex}`}>
+                <button className={node.isBlocked ? 'grid-item-blocked' : 'grid-item'} key={`${rowindex}-${colIndex}`}>
                     {node.value}
                 </button>
             )
@@ -77,13 +94,32 @@ function initializeGridWithNodes(grid: IGrid): INode[][]
     const createNode = (row: number, col: number) : INode => (
     {
         value: `${row}, ${col}`,
-        visited: false
+        visited: false,
+        isBlocked: false
     });
 
-    const nodes = Array.from({ length: grid.row }, (row, rowIndex) =>
-        Array.from({ length: grid.col }, (_, index) => createNode(rowIndex, index)));
+    const nodes = Array.from({ length: grid.rows }, (row, rowIndex) =>
+        Array.from({ length: grid.cols }, (_, index) => createNode(rowIndex, index)));
 
     return nodes;
+}
+
+function setMap(nodes: INode[][], coordinates: ICoordinate[]) {
+    if (nodes.length === 0)
+        return nodes;
+
+    const updatedNodes = [...nodes];
+
+    coordinates.forEach(({ row, col }) =>
+    {
+        updatedNodes[row][col] =
+        {
+            ...updatedNodes[row][col],
+            isBlocked: true
+        };
+    });
+
+    return updatedNodes;
 }
 
 function getSquareSize()

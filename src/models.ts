@@ -8,11 +8,20 @@ export interface IRootState
 export interface INode
 {
     value: string | null,
-    visited: boolean
+    visited: boolean,
+    isBlocked: boolean
 }
 
 export interface IGrid
 {
+    rows: number,
+    cols: number,
+    startCoordinate: ICoordinate,
+    finishCoordinate: ICoordinate
+}
+
+export interface ICoordinate
+{
     row: number,
-    col: number,
+    col: number
 }
