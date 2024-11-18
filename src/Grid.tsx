@@ -3,14 +3,13 @@ import { reducer } from "./reducer";
 import { initialState } from "./RootContext";
 import { ICoordinate, IGrid, INode } from "./models";
 import { ActionTypes } from "./actions";
+import { Boxes } from "./Boxes";
 
 export function Grid()
 {
     const [state, dispatch] = useReducer(reducer, initialState)
 
     const [squareSize, setSquareSize] = useState(0);
-
-    const [boxes, setBoxes] = useState<JSX.Element[][]>([[]])
 
     const updateSquareSize = () => setSquareSize(getSquareSize);
 
@@ -29,6 +28,11 @@ export function Grid()
                 cols: 6,
             }
         })
+
+        return () => {
+            console.log("Cleaning up event listener");
+            window.removeEventListener("resize", updateSquareSize);
+        }
     }, []);
 
     useEffect(() => {
@@ -47,18 +51,7 @@ export function Grid()
             type: ActionTypes.UPDATE_NODES,
             payload: updatedNodes
         })
-
-        return () => {
-            console.log("Cleaning up event listener");
-            window.removeEventListener("resize", updateSquareSize);
-        }
     }, [state.grid])
-
-    useEffect(() => {
-        const updatedBoxes = generateSquaresFromNodes(state.nodes);
-
-        setBoxes(updatedBoxes);
-    }, [state.nodes])
 
     const { rows: row, cols: col } = state.grid;
 
@@ -69,25 +62,10 @@ export function Grid()
                 gridTemplateRows: `repeat(${row}, ${squareSize}px)`,
                 gridTemplateColumns: `repeat(${col}, ${squareSize}px)`,
             }}>
-                {boxes}
+                <Boxes nodes={state.nodes}/>
         </div>
     );
 };
-
-function generateSquaresFromNodes(nodes: INode[][])
-{
-    return nodes.map((row, rowindex) =>
-    {
-        return row.map((node, colIndex) =>
-        {
-            return (
-                <button className={node.isBlocked ? 'grid-item-blocked' : 'grid-item'} key={`${rowindex}-${colIndex}`}>
-                    {node.value}
-                </button>
-            )
-        })
-    })
-}
 
 function initializeGridWithNodes(grid: IGrid): INode[][]
 {

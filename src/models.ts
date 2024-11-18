@@ -16,6 +16,7 @@ export interface IGrid
 {
     rows: number,
     cols: number,
+    squareSize: number,
     startCoordinate: ICoordinate,
     finishCoordinate: ICoordinate
 }

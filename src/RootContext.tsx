@@ -8,6 +8,7 @@ export const initialState: IRootState =
     grid: {
         rows: 0,
         cols: 0,
+        squareSize: 0,
         startCoordinate: {row: 0, col: 0},
         finishCoordinate: {row: 0, col: 0},
     },
